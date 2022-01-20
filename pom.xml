@@ -2,13 +2,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dev.psmolinski.kafka</groupId>
 	<artifactId>kafka-ssl-fix</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 	<url>https://github.com/piotrsmolinski/kafka-ssl-fix/</url>
 	<scm>
 		<connection>scm:git:git@github.com:piotrsmolinski/kafka-ssl-fix.git</connection>
 		<url>https://github.com/piotrsmolinski/kafka-ssl-fix</url>
-		<tag>HEAD</tag>
+		<tag>kafka-ssl-fix-0.0.1</tag>
 	</scm>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
