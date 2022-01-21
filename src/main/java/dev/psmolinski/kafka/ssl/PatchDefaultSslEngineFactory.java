@@ -1,5 +1,6 @@
 package dev.psmolinski.kafka.ssl;
 
+import org.apache.kafka.common.config.types.Password;
 import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -71,17 +72,13 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
             return new MethodVisitor(api, mv) {
                 @Override
                 public void visitCode() {
-                    // populate the stack
-                    mv.visitVarInsn(Opcodes.ALOAD, 2); // path
-                    // call the method
-                    mv.visitMethodInsn(
-                            Opcodes.INVOKESTATIC,
-                            "dev/psmolinski/kafka/ssl/PatchDefaultSslEngineFactory",
-                            "nullify",
-                            "(Ljava/lang/String;)Ljava/lang/String;",
-                            false);
-                    // replace parameter path
-                    mv.visitVarInsn(Opcodes.ASTORE, 2);
+
+                    nullifyString(mv, 2);
+                    nullifyPassword(mv, 3);
+                    nullifyPassword(mv, 4);
+                    nullifyPassword(mv, 5);
+                    nullifyPassword(mv, 6);
+
                     // continue with the original bytecode
                     super.visitCode();
 
@@ -102,23 +99,43 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
             return new MethodVisitor(api, mv) {
                 @Override
                 public void visitCode() {
-                    // populate the stack
-                    mv.visitVarInsn(Opcodes.ALOAD, 1); // path
-                    // call the method
-                    mv.visitMethodInsn(
-                            Opcodes.INVOKESTATIC,
-                            "dev/psmolinski/kafka/ssl/PatchDefaultSslEngineFactory",
-                            "nullify",
-                            "(Ljava/lang/String;)Ljava/lang/String;",
-                            false);
-                    // replace parameter path
-                    mv.visitVarInsn(Opcodes.ASTORE, 1);
+                    nullifyString(mv, 1);
+                    nullifyPassword(mv, 2);
+                    nullifyPassword(mv, 3);
                     // continue with the original bytecode
                     super.visitCode();
 
                 }
             };
 
+        }
+
+        private static void nullifyString(MethodVisitor mv, int param) {
+            // populate the stack
+            mv.visitVarInsn(Opcodes.ALOAD, param); // path
+            // call the method
+            mv.visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
+                    "dev/psmolinski/kafka/ssl/PatchDefaultSslEngineFactory",
+                    "nullify",
+                    "(Ljava/lang/String;)Ljava/lang/String;",
+                    false);
+            // replace parameter path
+            mv.visitVarInsn(Opcodes.ASTORE, param);
+        }
+
+        private static void nullifyPassword(MethodVisitor mv, int param) {
+            // populate the stack
+            mv.visitVarInsn(Opcodes.ALOAD, param); // path
+            // call the method
+            mv.visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
+                    "dev/psmolinski/kafka/ssl/PatchDefaultSslEngineFactory",
+                    "nullify",
+                    "(Lorg/apache/kafka/common/config/types/Password;)Lorg/apache/kafka/common/config/types/Password;",
+                    false);
+            // replace parameter path
+            mv.visitVarInsn(Opcodes.ASTORE, param);
         }
 
     }
@@ -128,6 +145,14 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
             return null;
         } else {
             return text;
+        }
+    }
+
+    public static Password nullify(Password password) {
+        if (password!=null && "".equals(password.value())) {
+            return null;
+        } else {
+            return password;
         }
     }
 
