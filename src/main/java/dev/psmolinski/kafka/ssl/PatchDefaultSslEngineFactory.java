@@ -47,8 +47,12 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
                      String signature,
                      String[] exceptions) {
 
-            if ("createKeystore".equals(name) || "createTruststore".equals(name)) {
-                return patchMethod(access, name, descriptor, signature, exceptions);
+            if ("createKeystore".equals(name)) {
+                return patchCreateKeystore(access, name, descriptor, signature, exceptions);
+            }
+
+            if ("createTruststore".equals(name)) {
+                return patchCreateTruststore(access, name, descriptor, signature, exceptions);
             }
 
             return super.visitMethod(access, name, descriptor, signature, exceptions);
@@ -56,7 +60,7 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
         }
 
         private MethodVisitor
-        patchMethod( int access,
+        patchCreateKeystore( int access,
                                   String name,
                                   String descriptor,
                                   String signature,
@@ -78,6 +82,37 @@ public class PatchDefaultSslEngineFactory implements ClassFileTransformer  {
                             false);
                     // replace parameter path
                     mv.visitVarInsn(Opcodes.ASTORE, 2);
+                    // continue with the original bytecode
+                    super.visitCode();
+
+                }
+            };
+
+        }
+
+        private MethodVisitor
+        patchCreateTruststore( int access,
+                             String name,
+                             String descriptor,
+                             String signature,
+                             String[] exceptions) {
+
+            MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+
+            return new MethodVisitor(api, mv) {
+                @Override
+                public void visitCode() {
+                    // populate the stack
+                    mv.visitVarInsn(Opcodes.ALOAD, 1); // path
+                    // call the method
+                    mv.visitMethodInsn(
+                            Opcodes.INVOKESTATIC,
+                            "dev/psmolinski/kafka/ssl/PatchDefaultSslEngineFactory",
+                            "nullify",
+                            "(Ljava/lang/String;)Ljava/lang/String;",
+                            false);
+                    // replace parameter path
+                    mv.visitVarInsn(Opcodes.ASTORE, 1);
                     // continue with the original bytecode
                     super.visitCode();
 

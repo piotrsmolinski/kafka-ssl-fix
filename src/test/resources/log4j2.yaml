@@ -1,0 +1,15 @@
+Configuration:
+  status: warn
+  thresholdFilter:
+    level: debug
+  appenders:
+    console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%m%n"
+  loggers:
+    root:
+      level: info
+      AppenderRef:
+        ref: STDOUT
